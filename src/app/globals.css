@@ -1,0 +1,304 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ===== MIDAS Design System — Casa Artemisa ===== */
+
+@theme inline {
+  /* Colores semánticos */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Gráficas */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Colores MIDAS personalizados */
+  --color-gold: #C9A55C;
+  --color-gold-hover: #B8923E;
+  --color-gold-light: #C9A55C15;
+  --color-gold-border: #C9A55C30;
+  --color-gold-muted: #C9A55C40;
+  --color-success: #059669;
+  --color-success-bg: #05966910;
+  --color-warning: #D97706;
+  --color-warning-bg: #D9770610;
+  --color-error: #DC2626;
+  --color-error-bg: #DC262610;
+  --color-info: #2563EB;
+  --color-info-bg: #2563EB10;
+
+  /* Fondos especiales */
+  --color-cream: #F5F0E6;
+  --color-cream-dark: #EDE8DA;
+  --color-sidebar-bg: #0A0A0A;
+  --color-sidebar-hover: #1A1A1A;
+  --color-sidebar-active: #141414;
+
+  /* Tipografías */
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-playfair);
+
+  /* Radios */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  /* Sombras MIDAS */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-modal: 0 12px 32px rgba(0, 0, 0, 0.08);
+  --shadow-gold: 0 0 0 3px #C9A55C25;
+
+  /* Animaciones */
+  --animate-page-in: page-in 0.3s ease;
+  --animate-card-in: card-in 0.3s ease;
+  --animate-row-in: row-in 0.2s ease;
+  --animate-fade-in: fade-in 0.2s ease;
+  --animate-slide-in-right: slide-in-right 0.25s ease;
+  --animate-shake: shake 0.2s ease;
+
+  @keyframes page-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes card-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes row-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slide-in-right {
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+}
+
+/* ===== Paleta MIDAS — Tema claro (único) ===== */
+:root {
+  --radius: 0.75rem;
+
+  /* Fondos */
+  --background: #F5F0E6;
+  --foreground: #1A1A1A;
+  --card: #FFFFFF;
+  --card-foreground: #1A1A1A;
+  --popover: #FFFFFF;
+  --popover-foreground: #1A1A1A;
+
+  /* Primario — Dorado Artemisa */
+  --primary: #C9A55C;
+  --primary-foreground: #FFFFFF;
+
+  /* Secundario */
+  --secondary: #EDE8DA;
+  --secondary-foreground: #1A1A1A;
+
+  /* Silenciado */
+  --muted: #EDE8DA;
+  --muted-foreground: #6B6B6B;
+
+  /* Acento */
+  --accent: #C9A55C15;
+  --accent-foreground: #C9A55C;
+
+  /* Destructivo */
+  --destructive: #DC2626;
+
+  /* Bordes e inputs */
+  --border: #E5E0D5;
+  --input: #E5E0D5;
+  --ring: #C9A55C;
+
+  /* Gráficas */
+  --chart-1: #C9A55C;
+  --chart-2: #059669;
+  --chart-3: #DC2626;
+  --chart-4: #2563EB;
+  --chart-5: #D97706;
+
+  /* Sidebar negro */
+  --sidebar: #0A0A0A;
+  --sidebar-foreground: #9CA3AF;
+  --sidebar-primary: #C9A55C;
+  --sidebar-primary-foreground: #C9A55C;
+  --sidebar-accent: #1A1A1A;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #1A1A1A;
+  --sidebar-ring: #C9A55C;
+}
+
+/* ===== Estilos base ===== */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  /* Todos los números en tablas y montos con alineación tabular */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Scrollbar personalizado */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #D4CFC4;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #B8B3A8;
+  }
+}
+
+/* ===== Utilidades MIDAS ===== */
+@layer utilities {
+  /* Skeleton shimmer */
+  .skeleton-shimmer {
+    background: linear-gradient(90deg, #E5E0D5 25%, #F5F0E6 50%, #E5E0D5 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Texto dorado para montos destacados */
+  .text-gold {
+    color: #C9A55C;
+  }
+
+  /* Focus ring dorado */
+  .focus-gold {
+    &:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px #C9A55C25;
+      border-color: #C9A55C;
+    }
+  }
+
+  /* Transiciones base */
+  .transition-fast {
+    transition: all 0.15s ease;
+  }
+
+  .transition-base {
+    transition: all 0.2s ease;
+  }
+
+  .transition-slow {
+    transition: all 0.3s ease;
+  }
+}
+
+/* ===== Sonner (Toast) personalizado para MIDAS ===== */
+[data-sonner-toaster] [data-sonner-toast] {
+  --normal-bg: #FFFFFF;
+  --normal-border: #E5E0D5;
+  --normal-text: #1A1A1A;
+  --success-bg: #FFFFFF;
+  --success-border: #059669;
+  --success-text: #059669;
+  --error-bg: #FFFFFF;
+  --error-border: #DC2626;
+  --error-text: #DC2626;
+  --warning-bg: #FFFFFF;
+  --warning-border: #D97706;
+  --warning-text: #D97706;
+  --info-bg: #FFFFFF;
+  --info-border: #2563EB;
+  --info-text: #2563EB;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* ===== Impresión térmica ===== */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    font-family: monospace !important;
+    font-size: 12px !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  /* Formato 58mm */
+  .print-58mm {
+    width: 48mm;
+    margin: 0 auto;
+  }
+
+  /* Formato 80mm */
+  .print-80mm {
+    width: 72mm;
+    margin: 0 auto;
+  }
+}
