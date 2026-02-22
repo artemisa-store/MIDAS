@@ -125,6 +125,11 @@ export function WikiEntryFormDialog({
       return
     }
 
+    if (!isEditing && !user?.id) {
+      toast.error("No se pudo identificar tu usuario. Recarga la página.")
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -142,32 +147,48 @@ export function WikiEntryFormDialog({
         if (url.trim()) metadata.url = url.trim()
       }
 
-      const payload = {
-        category,
-        title: title.trim(),
-        content: content.trim() || null,
-        metadata,
-        is_pinned: isPinned,
-        ...(isEditing ? {} : { created_by: user?.id }),
-      }
-
       if (isEditing) {
         const { error } = await supabase
           .from("wiki_entries")
-          .update(payload)
+          .update({
+            category,
+            title: title.trim(),
+            content: content.trim() || null,
+            metadata,
+            is_pinned: isPinned,
+          })
           .eq("id", entry.id)
-        if (error) throw error
+        if (error) {
+          console.error("Error wiki update:", error)
+          toast.error("Error al guardar", { description: error.message })
+          setLoading(false)
+          return
+        }
         toast.success("Entrada actualizada")
       } else {
-        const { error } = await supabase.from("wiki_entries").insert(payload)
-        if (error) throw error
+        const { error } = await supabase.from("wiki_entries").insert({
+          category,
+          title: title.trim(),
+          content: content.trim() || null,
+          metadata,
+          is_pinned: isPinned,
+          created_by: user!.id,
+        })
+        if (error) {
+          console.error("Error wiki insert:", error)
+          toast.error("Error al crear entrada", { description: error.message })
+          setLoading(false)
+          return
+        }
         toast.success("Entrada creada", { description: title.trim() })
       }
 
       onOpenChange(false)
       onCompleted()
-    } catch {
-      toast.error("Error al guardar la entrada")
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err)
+      console.error("Error wiki catch:", message)
+      toast.error("Error inesperado", { description: message })
     } finally {
       setLoading(false)
     }
