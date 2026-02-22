@@ -11,7 +11,7 @@ export function PageHeader({ title, description, children, serif = true }: PageH
       <div>
         <h1
           className={`text-2xl md:text-[28px] font-semibold text-foreground ${
-            serif ? "font-serif" : "font-sans"
+            serif ? "font-[family-name:var(--font-display)]" : "font-sans"
           }`}
         >
           {title}

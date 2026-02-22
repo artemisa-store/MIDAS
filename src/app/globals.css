@@ -67,8 +67,8 @@
   --color-sidebar-active: #141414;
 
   /* Tipografías */
-  --font-sans: var(--font-inter);
-  --font-serif: var(--font-playfair);
+  --font-sans: var(--font-sora);
+  --font-display: var(--font-space);
 
   /* Radios */
   --radius-sm: calc(var(--radius) - 4px);

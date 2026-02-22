@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useCallback } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -8,6 +8,7 @@ import {
   DollarSign,
   Receipt,
   Package,
+  Layers,
   TrendingDown,
   Landmark,
   ClipboardList,
@@ -17,6 +18,8 @@ import {
   UserCircle,
   BarChart3,
   Settings,
+  Truck,
+  BookOpen,
   ChevronLeft,
   ChevronRight,
   LogOut,
@@ -42,6 +45,7 @@ const ICON_MAP = {
   DollarSign,
   Receipt,
   Package,
+  Layers,
   TrendingDown,
   Landmark,
   ClipboardList,
@@ -51,6 +55,8 @@ const ICON_MAP = {
   UserCircle,
   BarChart3,
   Settings,
+  Truck,
+  BookOpen,
 } as const
 
 type IconName = keyof typeof ICON_MAP
@@ -68,6 +74,7 @@ const NAV_ITEMS: NavItemConfig[] = [
   { label: "Ventas", href: "/ventas", icon: "DollarSign", section: "principal" },
   { label: "Facturación", href: "/facturacion", icon: "Receipt", section: "principal" },
   { label: "Inventario", href: "/inventario", icon: "Package", section: "principal" },
+  { label: "Materias Primas", href: "/materias-primas", icon: "Layers", section: "principal" },
   { label: "Gastos", href: "/gastos", icon: "TrendingDown", section: "principal" },
   { label: "Caja y Banco", href: "/caja", icon: "Landmark", section: "principal" },
   { label: "Cuentas", href: "/cuentas", icon: "ClipboardList", section: "principal" },
@@ -76,7 +83,9 @@ const NAV_ITEMS: NavItemConfig[] = [
   { label: "Herramientas", href: "/herramientas", icon: "Wrench", section: "secundaria" },
   { label: "Pautas", href: "/pautas", icon: "Megaphone", section: "secundaria" },
   { label: "Clientes", href: "/clientes", icon: "UserCircle", section: "secundaria" },
+  { label: "Proveedores", href: "/proveedores", icon: "Truck", section: "secundaria" },
   { label: "Reportes", href: "/reportes", icon: "BarChart3", section: "secundaria" },
+  { label: "Wiki", href: "/wiki", icon: "BookOpen", section: "secundaria" },
   // Admin
   { label: "Configuración", href: "/configuracion", icon: "Settings", section: "admin" },
 ]
@@ -84,23 +93,26 @@ const NAV_ITEMS: NavItemConfig[] = [
 interface SidebarProps {
   isOpen: boolean
   onClose: () => void
+  collapsed?: boolean
+  onCollapse?: (collapsed: boolean) => void
 }
 
-export function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false)
+export function Sidebar({ isOpen, onClose, collapsed = false, onCollapse }: SidebarProps) {
   const pathname = usePathname()
   const { user, isAdmin, hasPermission, logout } = useAuth()
 
-  const isActive = (href: string) => {
+  const isActive = useCallback((href: string) => {
     if (href === "/") return pathname === "/"
     return pathname.startsWith(href)
-  }
+  }, [pathname])
 
-  const principalItems = NAV_ITEMS.filter((item) => item.section === "principal")
-  const secundariaItems = NAV_ITEMS.filter((item) => item.section === "secundaria")
-  const adminItems = NAV_ITEMS.filter((item) => item.section === "admin")
+  const { principalItems, secundariaItems, adminItems } = useMemo(() => ({
+    principalItems: NAV_ITEMS.filter((item) => item.section === "principal"),
+    secundariaItems: NAV_ITEMS.filter((item) => item.section === "secundaria"),
+    adminItems: NAV_ITEMS.filter((item) => item.section === "admin"),
+  }), [])
 
-  const renderNavItem = (item: NavItemConfig) => {
+  const renderNavItem = useCallback((item: NavItemConfig) => {
     const Icon = ICON_MAP[item.icon]
     const active = isActive(item.href)
 
@@ -137,7 +149,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     }
 
     return <div key={item.href}>{linkContent}</div>
-  }
+  }, [isActive, isAdmin, onClose, collapsed])
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
@@ -148,7 +160,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       )}>
         <Link href="/" className="block" onClick={onClose}>
           <h1 className={cn(
-            "font-serif text-gold font-bold tracking-[0.08em]",
+            "font-[family-name:var(--font-display)] text-gold font-bold tracking-[0.08em]",
             collapsed ? "text-lg" : "text-2xl"
           )}>
             MIDAS<span className="text-gold/60">·</span>
@@ -189,7 +201,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Botón colapsar (solo desktop) */}
       <div className="hidden lg:block px-3 py-2 border-t border-[#1A1A1A]">
         <button
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={() => onCollapse && onCollapse(!collapsed)}
           className="flex items-center justify-center w-full py-2 text-[#6B6B6B] hover:text-white transition-colors rounded-lg hover:bg-sidebar-hover"
         >
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}

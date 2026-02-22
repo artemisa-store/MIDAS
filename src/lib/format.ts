@@ -87,3 +87,10 @@ export function getInitials(name: string): string {
 export function formatPercentage(value: number, decimals = 1): string {
   return `${value.toFixed(decimals).replace(".", ",")}%`
 }
+
+/**
+ * Calcula la cantidad total de items de una venta
+ */
+export function getTotalItems(items: Array<{ quantity: number }> | undefined): number {
+  return (items || []).reduce((sum, item) => sum + item.quantity, 0)
+}

@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { Input } from "@/components/ui/input"
@@ -15,9 +16,34 @@ export function LoginForm() {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [loadingMicrosoft, setLoadingMicrosoft] = useState(false)
   const [shake, setShake] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+
+  const handleMicrosoftLogin = async () => {
+    setLoadingMicrosoft(true)
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "azure",
+        options: {
+          scopes: "email profile openid",
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+      if (error) {
+        toast.error("Error al conectar con Microsoft", {
+          description: error.message,
+        })
+        setLoadingMicrosoft(false)
+      }
+    } catch {
+      toast.error("Error inesperado", {
+        description: "No se pudo iniciar sesión con Microsoft.",
+      })
+      setLoadingMicrosoft(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -140,17 +166,50 @@ export function LoginForm() {
         )}
       </Button>
 
+      {/* Separador */}
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-border" />
+        </div>
+        <div className="relative flex justify-center text-xs">
+          <span className="bg-cream px-3 text-muted-foreground/60">o continúa con</span>
+        </div>
+      </div>
+
+      {/* Botón Microsoft */}
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full h-11 border-[1.5px] border-border bg-white hover:bg-muted/50 text-foreground font-medium text-sm transition-all hover:border-gold/40 active:scale-[0.98]"
+        disabled={loading || loadingMicrosoft}
+        onClick={handleMicrosoftLogin}
+      >
+        {loadingMicrosoft ? (
+          <>
+            <Loader2 size={18} className="animate-spin mr-2" />
+            Conectando con Microsoft...
+          </>
+        ) : (
+          <>
+            <svg className="mr-2 size-5" viewBox="0 0 21 21" fill="none">
+              <rect x="1" y="1" width="9" height="9" fill="#F25022" />
+              <rect x="11" y="1" width="9" height="9" fill="#7FBA00" />
+              <rect x="1" y="11" width="9" height="9" fill="#00A4EF" />
+              <rect x="11" y="11" width="9" height="9" fill="#FFB900" />
+            </svg>
+            Iniciar sesión con Microsoft
+          </>
+        )}
+      </Button>
+
       {/* Link para recuperar contraseña */}
       <p className="text-center">
-        <button
-          type="button"
-          className="text-xs text-muted-foreground hover:text-gold transition-colors"
-          onClick={() =>
-            toast.info("Contacta al administrador para restablecer tu contraseña.")
-          }
+        <Link
+          href="/forgot-password"
+          className="text-xs text-muted-foreground hover:text-gold transition-colors inline-block pt-1"
         >
           ¿Olvidaste tu contraseña?
-        </button>
+        </Link>
       </p>
     </form>
   )

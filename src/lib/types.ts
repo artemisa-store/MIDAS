@@ -8,6 +8,7 @@ export type ModuleName =
   | "ventas"
   | "facturacion"
   | "inventario"
+  | "materias_primas"
   | "gastos"
   | "caja"
   | "cuentas"
@@ -17,6 +18,7 @@ export type ModuleName =
   | "clientes"
   | "reportes"
   | "configuracion"
+  | "wiki"
 
 export type ModulePermissions = Record<ModuleName, boolean>
 
@@ -86,6 +88,9 @@ export interface Client {
   first_purchase_date: string | null
   tags: string[]
   notes: string | null
+  is_active: boolean
+  credit_enabled: boolean
+  credit_limit: number
   created_at: string
   updated_at: string
 }
@@ -114,6 +119,13 @@ export interface Sale {
   shipping_address: string | null
   notes: string | null
   campaign_id: string | null
+  // Campos de crédito/fiado
+  is_credit: boolean
+  credit_fee_percentage: number
+  credit_fee_amount: number
+  credit_installments: number
+  initial_payment: number
+  total_with_fee: number
   created_by: string
   created_at: string
   updated_at: string
@@ -156,6 +168,7 @@ export interface Expense {
   supplier_invoice_number: string | null
   receipt_image_url: string | null
   notes: string | null
+  is_recurring: boolean
   registered_by: string
   created_at: string
   updated_at: string
@@ -171,6 +184,7 @@ export interface Supplier {
   email: string | null
   supplies_description: string | null
   notes: string | null
+  is_active: boolean
   created_at: string
   updated_at: string
 }
@@ -365,6 +379,80 @@ export interface Setting {
   updated_at: string
 }
 
+// --- Materias primas ---
+export type RawMaterialUnit = "unidades" | "metros" | "rollos" | "hojas" | "kilogramos" | "litros"
+
+export interface RawMaterial {
+  id: string
+  name: string
+  category: string
+  description: string | null
+  stock: number
+  unit: RawMaterialUnit
+  min_stock_alert: number
+  cost_per_unit: number
+  supplier_id: string | null
+  image_url: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  supplier?: Supplier
+}
+
+export interface RawMaterialMovement {
+  id: string
+  raw_material_id: string
+  movement_type: MovementType
+  quantity: number
+  previous_stock: number
+  new_stock: number
+  notes: string | null
+  created_by: string
+  created_at: string
+  raw_material?: RawMaterial
+  creator?: User
+}
+
+// --- Tipos expandidos (con joins de Supabase) ---
+export type MovementExpanded = CashBankMovement & {
+  account?: { name: string; type: AccountType }
+}
+
+export interface DashboardStats {
+  ventasMes: number
+  gastosMes: number
+  cuentasPorCobrar: number
+  unidadesVendidas: number
+  dineroCaja: number
+  dineroBanco: number
+  liquidezTotal: number
+}
+
+export interface RecentSale {
+  id: string
+  invoice_number: string
+  total: number
+  status: string
+  payment_method: string
+  created_at: string
+  client: { full_name: string } | null
+}
+
+export interface DailyData {
+  day: string
+  ventas: number
+  gastos: number
+}
+
+export interface Debtor {
+  id: string
+  clientName: string
+  totalAmount: number
+  paidAmount: number
+  remainingAmount: number
+  invoiceNumber: string
+}
+
 // --- Tipos auxiliares para la UI ---
 export interface NavItem {
   label: string
@@ -384,4 +472,32 @@ export interface StatCard {
   }
   format?: "currency" | "number" | "text"
   borderColor?: "gold" | "success" | "error" | "warning" | "info"
+}
+
+// --- Wiki ---
+export type WikiCategory = "credenciales" | "notas" | "ideas" | "tareas" | "enlaces" | "identidad"
+export type WikiTaskStatus = "pendiente" | "en_progreso" | "completada"
+export type WikiTaskPriority = "baja" | "media" | "alta"
+
+export interface WikiEntryMetadata {
+  username?: string
+  password?: string
+  pin?: string
+  url?: string
+  status?: WikiTaskStatus
+  priority?: WikiTaskPriority
+  tags?: string[]
+}
+
+export interface WikiEntry {
+  id: string
+  category: WikiCategory
+  title: string
+  content: string | null
+  metadata: WikiEntryMetadata
+  is_pinned: boolean
+  is_archived: boolean
+  created_by: string | null
+  created_at: string
+  updated_at: string
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
 import { formatCOP, formatNumber } from "@/lib/format"
@@ -13,6 +13,7 @@ import {
   Building2,
   Users,
   ShoppingCart,
+  Wallet,
   ArrowUp,
   ArrowDown,
   type LucideIcon,
@@ -28,6 +29,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Building2,
   Users,
   ShoppingCart,
+  Wallet,
 }
 
 interface StatCardProps {
@@ -41,15 +43,33 @@ interface StatCardProps {
     isPositive: boolean
   }
   delay?: number
+  variant?: "default" | "bento"
 }
 
-// Colores del borde izquierdo según estado
+// Colores del borde según estado
 const BORDER_COLORS = {
-  gold: "border-l-gold",
-  success: "border-l-success",
-  error: "border-l-error",
-  warning: "border-l-warning",
-  info: "border-l-info",
+  default: {
+    gold: "border-l-gold",
+    success: "border-l-success",
+    error: "border-l-error",
+    warning: "border-l-warning",
+    info: "border-l-info",
+  },
+  bento: {
+    gold: "border-b-gold",
+    success: "border-b-success",
+    error: "border-b-error",
+    warning: "border-b-warning",
+    info: "border-b-info",
+  }
+}
+
+const BG_GLOW = {
+  gold: "from-gold/5 to-transparent",
+  success: "from-success/5 to-transparent",
+  error: "from-error/5 to-transparent",
+  warning: "from-warning/5 to-transparent",
+  info: "from-info/5 to-transparent",
 }
 
 export function StatCard({
@@ -60,101 +80,128 @@ export function StatCard({
   borderColor = "gold",
   trend,
   delay = 0,
+  variant = "default",
 }: StatCardProps) {
   const [displayValue, setDisplayValue] = useState(0)
   const [isVisible, setIsVisible] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
 
-  // Animación count-up
+  // Animación de visibilidad + count-up consolidados en un solo efecto
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), delay * 50)
-    return () => clearTimeout(timer)
-  }, [delay])
+    const visibilityTimer = setTimeout(() => {
+      setIsVisible(true)
 
-  useEffect(() => {
-    if (!isVisible || value === 0) return
+      if (value === 0) return
 
-    const duration = 800
-    const steps = 30
-    const stepTime = duration / steps
-    let current = 0
+      const duration = 800
+      const steps = 30
+      const stepTime = duration / steps
+      let current = 0
 
-    const timer = setInterval(() => {
-      current++
-      const progress = current / steps
-      // Easing ease-out
-      const eased = 1 - Math.pow(1 - progress, 3)
-      setDisplayValue(Math.round(value * eased))
+      const counter = setInterval(() => {
+        current++
+        const progress = current / steps
+        const eased = 1 - Math.pow(1 - progress, 3)
+        setDisplayValue(Math.round(value * eased))
 
-      if (current >= steps) {
-        setDisplayValue(value)
-        clearInterval(timer)
-      }
-    }, stepTime)
+        if (current >= steps) {
+          setDisplayValue(value)
+          clearInterval(counter)
+        }
+      }, stepTime)
 
-    return () => clearInterval(timer)
-  }, [isVisible, value])
+      // Limpiar interval si el componente se desmonta durante la animación
+      return () => clearInterval(counter)
+    }, delay * 50)
+
+    return () => clearTimeout(visibilityTimer)
+  }, [delay, value])
 
   const Icon = ICON_MAP[icon] || DollarSign
 
-  const formattedValue = () => {
+  const formattedValue = useMemo(() => {
     switch (format) {
       case "currency":
         return formatCOP(displayValue)
       case "number":
         return formatNumber(displayValue)
       case "units":
-        return `${formatNumber(displayValue)} uds`
+        return `${formatNumber(displayValue)} und.`
       default:
         return formatNumber(displayValue)
     }
-  }
+  }, [format, displayValue])
 
   return (
     <Card
-      ref={ref}
       className={cn(
-        "relative border-l-[3px] p-5 transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5",
-        BORDER_COLORS[borderColor],
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
+        "relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group bg-card border-border",
+        variant === "default" ? "border-l-[3px] p-5" : "border-b-[4px] p-6 rounded-2xl",
+        BORDER_COLORS[variant][borderColor],
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       )}
       style={{ transitionDelay: `${delay * 50}ms` }}
     >
-      {/* Icono en la esquina superior derecha */}
-      <Icon
-        size={20}
-        className="absolute top-4 right-4 text-muted-foreground/50"
-      />
+      {/* Background Gradient Glow */}
+      <div className={cn(
+        "absolute inset-0 bg-gradient-to-br opacity-50 pointer-events-none transition-opacity duration-300 group-hover:opacity-100",
+        BG_GLOW[borderColor]
+      )} />
 
-      {/* Label */}
-      <p className="text-[13px] font-semibold uppercase tracking-[0.05em] text-muted-foreground mb-2">
-        {label}
-      </p>
+      {/* Glassmorphism shine effect */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/40 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
 
-      {/* Valor principal */}
-      <p className="font-serif text-2xl md:text-3xl font-bold text-gold tabular-nums">
-        {formattedValue()}
-      </p>
-
-      {/* Tendencia comparativa */}
-      {trend && (
-        <div className="flex items-center gap-1 mt-2">
-          {trend.isPositive ? (
-            <ArrowUp size={14} className="text-success" />
-          ) : (
-            <ArrowDown size={14} className="text-error" />
-          )}
-          <span
-            className={cn(
-              "text-xs font-medium",
-              trend.isPositive ? "text-success" : "text-error"
-            )}
-          >
-            {trend.value > 0 ? "+" : ""}
-            {trend.value}% vs mes anterior
-          </span>
+      <div className="relative z-10">
+        <div className="flex justify-between items-start mb-4">
+          <p className={cn(
+            "font-semibold uppercase tracking-[0.05em] text-muted-foreground",
+            variant === "bento" ? "text-sm" : "text-[13px] mb-2"
+          )}>
+            {label}
+          </p>
+          <div className={cn(
+            "p-2 rounded-xl bg-background shadow-sm border border-border transition-transform group-hover:scale-110",
+            variant === "bento" ? "size-10 flex items-center justify-center" : "size-8 flex items-center justify-center"
+          )}>
+            <Icon
+              size={variant === "bento" ? 20 : 16}
+              className={cn(
+                borderColor === "gold" ? "text-gold" :
+                  borderColor === "success" ? "text-success" :
+                    borderColor === "error" ? "text-error" :
+                      borderColor === "warning" ? "text-warning" : "text-info"
+              )}
+            />
+          </div>
         </div>
-      )}
+
+        {/* Valor principal */}
+        <p className={cn(
+          "font-[family-name:var(--font-display)] font-bold text-foreground tabular-nums",
+          variant === "bento" ? "text-3xl md:text-4xl" : "text-2xl md:text-3xl"
+        )}>
+          {formattedValue}
+        </p>
+
+        {/* Tendencia comparativa */}
+        {trend && (
+          <div className="flex items-center gap-1.5 mt-3 bg-background/50 w-fit px-2 py-1 rounded-md border border-border/50">
+            {trend.isPositive ? (
+              <ArrowUp size={14} className="text-success" />
+            ) : (
+              <ArrowDown size={14} className="text-error" />
+            )}
+            <span
+              className={cn(
+                "text-xs font-semibold",
+                trend.isPositive ? "text-success" : "text-error"
+              )}
+            >
+              {trend.value > 0 ? "+" : ""}
+              {trend.value}% vs mes anterior
+            </span>
+          </div>
+        )}
+      </div>
     </Card>
   )
 }

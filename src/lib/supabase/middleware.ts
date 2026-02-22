@@ -36,9 +36,10 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // Rutas públicas (login)
+  // Rutas públicas (login + OAuth callback)
   const isLoginPage = request.nextUrl.pathname === "/login"
-  const isPublicRoute = isLoginPage
+  const isAuthCallback = request.nextUrl.pathname.startsWith("/auth/callback")
+  const isPublicRoute = isLoginPage || isAuthCallback
 
   if (!user && !isPublicRoute) {
     // Sin sesión → redirigir al login

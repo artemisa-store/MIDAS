@@ -1,0 +1,36 @@
+/* ===== Estilos de impresión para recibos térmicos 80mm ===== */
+
+@media print {
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+
+  /* Ocultar todo el contenido de la app */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Solo mostrar el recibo */
+  .recibo-termico,
+  .recibo-termico * {
+    visibility: visible;
+  }
+
+  .recibo-termico {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 80mm;
+    margin: 0;
+    padding: 4mm;
+  }
+
+  /* Sin fondos ni sombras en impresión */
+  .recibo-termico {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
